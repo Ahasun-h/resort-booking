@@ -46,6 +46,14 @@ const routes = [
     },
     // Resort
     {
+        path: '/resorts',
+        name: 'Resort',
+        component : () => import('../views/Resort.vue'),
+        meta: {
+            requiresAuth: true
+        }
+    },
+    {
         path: '/resort/create',
         name: 'CreateResort',
         component : () => import('../views/CreateResort.vue'),
@@ -53,6 +61,16 @@ const routes = [
             requiresAuth: true
         }
     },
+    {
+        path: '/resort/update/:id',
+        name: 'UpdateResort',
+        component : () => import('../views/UpdateResort.vue'),
+        meta: {
+            requiresAuth: true
+        }
+    },
+
+
     {
         path : '/login',
         name :'Login',

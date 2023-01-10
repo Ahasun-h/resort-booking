@@ -1,5 +1,5 @@
 <template>
-  <Nav />
+    <Nav />
   <section class=" gradient-form">
         <div class="container py-5">
 
@@ -8,7 +8,7 @@
                     <div class="col">
                         <h4 class="text-start">
                             <strong>
-                                Add Resort 
+                                Update Resort 
                             </strong>
                         </h4>
                     </div>
@@ -28,7 +28,7 @@
                                         {{ settingData.error }}
                                     </div>
 
-                                    <form @submit.prevent="createResort">
+                                    <form @submit.prevent="updateResort">
                                         <div class="form-outline mb-4">
                                             <label class="form-label" for="name">Name</label>
                                             <input type="text" v-model="resort.name" id="name" class="form-control"
@@ -74,6 +74,14 @@
                                                 {{ validation_error.price_per_night[0] }}
                                             </p>
                                         </div>
+                                        <div v-if="prevImages.length > 0" class="border border-primary p-4">
+                                            <div >
+                                                <div class="image_privew"  v-for="prevImage in prevImages" :key="prevImage">
+                                                    <img class="w-100" :src="prevImage.image" />
+                                                    <button class="btn btn-danger text-wite img_remove" @click.prevent="deleteImage(prevImage.id)">X</button>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div class="form-outline mb-4">
                                             <label for="images" class="form-label">Image:</label>
                                             <input class="form-control mb-3" multiple type="file" :class="errorHandler('images') ? 'is-invalid' : '' "  @change="onFileChange">
@@ -86,15 +94,12 @@
                                                     <button class="btn btn-danger text-wite img_remove" @click="removeImage(index)">X</button>
                                                 </div>
                                             </div>
-
                                         </div>
-                                     
-                                        
                                         <div class="text-start mb-4">
                                             <button v-if="settingData.buttonDisabled"
-                                                    class="btn btn-primary btn-block fa-lg gradient-custom-2"
+                                                    class="btn btn-success btn-block fa-lg gradient-custom-2"
                                                     type="submit">
-                                                Submit
+                                                Update
                                             </button>
                                             <div v-if="settingData.isLoading" class="spinner-border text-info" role="status">
                                             </div>
@@ -119,16 +124,17 @@
     import { ref, reactive } from 'vue';
     import Sidebar from '../components/Sidebar.vue';
     import DashboardHeader from '../components/DashboardHeader.vue';
-  
 
 export default {
-    name:'CreateResort',
+    name: 'UpdateResort',
     components:{ Nav },
 
     data:function (){
         return {
-            
+            id: this.$route.params.id,
             images : [],
+            prevImages : [],
+            token: sessionStorage.getItem('ken'),
             resort : {
                 name: '',
                 description: '',
@@ -148,9 +154,8 @@ export default {
         }
     },
     methods: {
-
+        // Image input field
         onFileChange(e) {
-    
             var files = e.target.files || e.dataTransfer.files;
             if (!files.length) return;
             this.createImage(files);
@@ -166,23 +171,21 @@ export default {
             reader.readAsDataURL(files[index]);
             }
         },
+        // remove image form iput field
         removeImage(index) {
             this.images.splice(index, 1)
         },
         
-        createResort: async function() {
+        
+        updateResort: async function() {
 
+           
             this.resort.images = this.images
-
-            console.log(this.resort)
-
-
-            const store = useStore();
 
             this.settingData.isLoading = true;
             this.settingData.buttonDisabled = false;
 
-            await axiosClient.post('/api/resort/create',this.resort,{headers: {'Authorization': 'Bearer '+this.store.state.token,'Content-Type':'multipart/form-data'}})
+            await axiosClient.post('/api/resort/update/'+this.id,this.resort,{headers: {'Authorization': 'Bearer '+this.$store.state.token,'Content-Type':'multipart/form-data'}})
             .then(res => {
                 if (res.data.success) {
                     this.settingData.isLoading = false;
@@ -191,6 +194,7 @@ export default {
                 this.$router.push({path:'/resorts'})
             })
             .catch(e => {
+                console.log(e)
                 this.settingData.isLoading = false;
                 this.settingData.buttonDisabled = true;
                 if (e.response.status === 422) {
@@ -203,13 +207,53 @@ export default {
 
         errorHandler: function(value){
             return this.validation_error.hasOwnProperty(value)
-        }
+        },
 
+        getResortImage: async function (){
+            await axiosClient.get('/api/resort/images/'+this.id,{ headers: {'Authorization': 'Bearer '+this.$store.state.token }})
+            .then(res => {
+                if (res.data.success) {
+                    this.prevImages = res.data.data
+                }
+            })
+            .catch(e => {
+                this.settingData.error = e.message
+            })
+        },
+
+        getResorts: async function (){
+
+            await axiosClient.get('/api/resort/view/'+this.id,{ headers: {'Authorization': 'Bearer '+this.$store.state.token }})
+                .then(res => {
+                    if (res.data.success) {
+                        this.resort = res.data.data
+                    }
+                })
+                .catch(e => {
+                    this.settingData.error = e.message
+                })
+        },
+
+        deleteImage:async function (id){
+            await axiosClient.delete('/api/resort/images/delete/'+id,{ headers: {'Authorization': 'Bearer '+this.$store.state.token }})
+                .then(res => {
+                    if (res.data.success ) {
+                       
+                    }
+                    this.getResortImage();
+                })
+                .catch(e => {
+                    this.settingData.error = e.message
+                })
+        }
        
 
 
-    }
-   
+    },
+    mounted() {
+        this.getResorts();
+        this.getResortImage();
+    },
 }
 </script>
 
