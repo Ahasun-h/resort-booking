@@ -13,13 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('resorts', function (Blueprint $table) {
+        Schema::create('resort_images', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->text('description');
-            $table->string('address');
-            $table->string('location')->nullable();
-            $table->double('price_per_night');
+            $table->integer('resort_id');
+            $table->string('image');
             $table->timestamps();
         });
     }
@@ -31,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('resorts');
+        Schema::dropIfExists('resort_images');
     }
 };

@@ -27,8 +27,16 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::delete('/user/delete/{id}',[UserController::class,'delete']);
 
     // Resort Route
-    Route::post('resort/create',[ResortController::class,'store']);
+    Route::get('/resorts',[ResortController::class,'index']);
+    Route::post('/resort/create',[ResortController::class,'store']);
+    Route::get('/resort/view/{id}',[ResortController::class,'show']);
+    Route::get('/resort/images/{id}',[ResortController::class,'resortImages']);
+    Route::delete('/resort/images/delete/{id}',[ResortController::class,'resortImagesDelete']);
+    Route::delete('/resort/delete/{id}',[ResortController::class,'delete']);
+    Route::post('/resort/update/{id}',[ResortController::class,'update']);
 
 });
+
+
 
 Route::post('login',[AuthenticationController::class,'login']);
