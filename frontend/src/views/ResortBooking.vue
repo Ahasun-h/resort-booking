@@ -1,18 +1,12 @@
 <template>
-
-    <div class="container-fluid p-0">
-        <div class="d-flex">
-            <Sidebar />
-            <div class="col">
-                <DashboardHeader />
-                <main>
-                    <div class="container p-5">
+  <NavBar />
+  <div class="container p-5">
                         <div class="col-12">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="col">
                                     <h4 class="text-start">
                                         <strong>
-                                            Create User
+                                            Booking
                                         </strong>
                                     </h4>
                                 </div>
@@ -21,6 +15,7 @@
                                 </router-link>
                             </div>
                         </div>
+                      
                         <div class="row d-flex justify-content-center align-items-center h-100">
                             <div class="col-8">
                                 <div class="rounded-3 text-black">
@@ -34,43 +29,44 @@
                                                 <!-- End: Error message alert-->
 
                                                 <!-- Start: form -->
-                                                <form @submit.prevent="handleRegister">
-                                                    <div class="form-outline mb-4">
-                                                        <label class="form-label" for="name">Name</label>
-                                                        <input type="text" v-model="form.name" id="name" class="form-control"
-                                                            :class="errorHandler('name') ? 'is-invalid' : '' "
-                                                            placeholder="Example"/>
-                                                        <p v-if="errorHandler('name')" class="text-danger">
-                                                            {{ validation_error.name[0] }}
-                                                        </p>
-                                                    </div>
+                                                <form @submit.prevent="handleBooking">
                                                     <div class="form-outline mb-4">
                                                         <label class="form-label" for="email">Email</label>
-                                                        <input type="email" v-model="form.email" id="email" class="form-control"
-                                                            :class="errorHandler('email') ? 'is-invalid' : ''"
-                                                            placeholder="example@mail.com"/>
+                                                        <input type="text" v-model="bookingInfo.email" id="email" class="form-control"
+                                                            :class="errorHandler('email') ? 'is-invalid' : '' "
+                                                            placeholder="Example@email.com"/>
                                                         <p v-if="errorHandler('email')" class="text-danger">
                                                             {{ validation_error.email[0] }}
                                                         </p>
                                                     </div>
                                                     <div class="form-outline mb-4">
-                                                        <label class="form-label" for="password">Password</label>
-                                                        <input type="password" v-model="form.password" id="password"
-                                                            :class="errorHandler('password') ? 'is-invalid' : ''"
-                                                            class="form-control"/>
-                                                        <p v-if="errorHandler('password')" class="text-danger">
-                                                            {{ validation_error.password[0] }}
+                                                        <label class="form-label" for="contact_number">Contact Number</label>
+                                                        <input type="text" v-model="bookingInfo.contact_number" id="contact_number" class="form-control"
+                                                            :class="errorHandler('email') ? 'is-invalid' : ''"
+                                                            placeholder="+880"/>
+                                                        <p v-if="errorHandler('contact_number')" class="text-danger">
+                                                            {{ validation_error.contact_number[0] }}
                                                         </p>
                                                     </div>
                                                     <div class="form-outline mb-4">
-                                                        <label class="form-label" for="confirm_password">Confirm Password</label>
-                                                        <input type="password" v-model="form.confirm_password" id="confirm_password"
-                                                            :class="errorHandler('confirm_password') ? 'is-invalid' : ''"
-                                                            class="form-control"/>
-                                                        <p v-if="errorHandler('confirm_password')" class="text-danger">
-                                                            {{ validation_error.confirm_password[0] }}
+                                                        <label class="form-label" for="booking_date">Booking Date</label>
+                                                        <input type="date" v-model="bookingInfo.booking_date" id="booking_date" class="form-control"
+                                                            :class="errorHandler('booking_date') ? 'is-invalid' : ''"
+                                                            />
+                                                        <p v-if="errorHandler('booking_date')" class="text-danger">
+                                                            {{ validation_error.booking_date[0] }}
                                                         </p>
                                                     </div>
+                                                    <div class="form-outline mb-4">
+                                                        <label class="form-label" for="number_days">Stay Days</label>
+                                                        <input type="number" v-model="bookingInfo.number_days" id="number_days" class="form-control"
+                                                            :class="errorHandler('number_days') ? 'is-invalid' : ''"
+                                                            />
+                                                        <p v-if="errorHandler('number_days')" class="text-danger">
+                                                            {{ validation_error.number_days[0] }}
+                                                        </p>
+                                                    </div>
+                                                 
                                                     <div class="text-start mb-4">
                                                         <button v-if="data.buttonDisabled"
                                                                 class="btn btn-primary btn-block fa-lg gradient-custom-2"
@@ -89,26 +85,18 @@
                             </div>
                         </div>
                     </div>
-                </main>
-            </div>
-        </div>
-    </div>
 </template>
-
 <script>
-    import { reactive, ref} from 'vue';
-    import axiosClient from '../axios';
+
+    import NavBar from '../components/NavBar.vue'
     import {useRouter} from 'vue-router'
     import { useStore } from 'vuex'
-    import Sidebar from '../components/Sidebar.vue';
-    import DashboardHeader from '../components/DashboardHeader.vue';
-
+    import axiosClient from '../axios';
+    import { ref, onMounted } from 'vue';
 
     export default {
-        name: "CreateUser",
-        components: {
-            Sidebar, DashboardHeader
-        },
+        name:'ResortBooking',
+        components: { NavBar },
         setup() {
             const router = useRouter();
             const store = useStore();
@@ -117,29 +105,35 @@
                 buttonDisabled: true,
                 error : null
             });
-            let form = reactive({
-                name: '',
+            let bookingInfo = ref({
                 email: '',
-                password: '',
-                confirm_password: ''
+                contact_number: '',
+                booking_date: '',
+                number_days: ''
             });
             let validation_error = ref({});
 
-            /**
+             // Route params
+             const id = ref(useRouter().currentRoute.value.params);
+
+             /**
              * Create new user in database
              *
              * @returns {Promise<void>}
              */
-            const handleRegister = async () => {
+             const handleBooking = async () => {
                 data.value.isLoading = true;
                 data.value.buttonDisabled = false;
-                await axiosClient.post('/api/user/create',form,{headers: {'Authorization': 'Bearer '+store.state.token }},)
+                await axiosClient.post('/api/resort-booking/'+id.value.id,bookingInfo.value)
                     .then(res => {
-                        if (res.data.success) {
-                            data.value.isLoading = false;
-                            data.value.buttonDisabled = true;
-                            router.push({name: 'User'});
+                        console.log(res)
+                        if (res.data.success == true) {
+                            router.push({name: 'Home'});
+                        }else{
+                             data.value.error = res.data.message
                         }
+                        data.value.isLoading = false;
+                        data.value.buttonDisabled = true;
                     })
                     .catch(e => {
                         data.value.isLoading = false;
@@ -162,13 +156,11 @@
                 return validation_error.value.hasOwnProperty(value)
             }
 
-            return {form, validation_error, data, handleRegister, errorHandler}
-        },
+            return { data, bookingInfo, validation_error, handleBooking, errorHandler }
+        }
     }
 </script>
 
-<style scoped>
-    .card-body img {
-        width: 80px;
-    }
+<style>
+
 </style>

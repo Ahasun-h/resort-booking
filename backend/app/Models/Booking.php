@@ -5,12 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Resort extends Model
+class Booking extends Model
 {
     use HasFactory;
 
-    public function resortImage()
-    {
-        return $this->hasMany(ResortImage::class,'resort_id');
+    // Relation With Bank
+    public function resort() {
+        return $this->belongsTo(Resort::class, 'resort_id');
     }
 }

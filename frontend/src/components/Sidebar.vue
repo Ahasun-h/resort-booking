@@ -18,28 +18,49 @@
                 </li>
                 
                 <li>
-                    <router-link :to="{ name : 'CreateResort' }" href="#" class="nav-link text-white">
+                    <router-link :to="{ name : 'Resort' }" href="#" class="nav-link text-white">
                         <svg class="bi me-2" width="16" height="16"><use xlink:href="#table"></use></svg>
                         Resort
                     </router-link>
                 </li>
+
+                <li>
+                    <router-link :to="{ name : 'Bookings' }" href="#" class="nav-link text-white">
+                        <svg class="bi me-2" width="16" height="16"><use xlink:href="#table"></use></svg>
+                        Bookings
+                    </router-link>
+                </li>
+               
                
             </ul>
             <hr>
             <div class="dropdown">
                 <a href="#" class="d-flex align-items-center text-white text-decoration-none">
                     <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
-                    <strong>mdo</strong>
+                    <button class="btn btn-danger" @click="logoutHandle">Logout</button>
                 </a>
-               
             </div>
         </div>
     </div>
 </template>
 
 <script>
+    import {useRouter} from 'vue-router'
+    import { useStore } from 'vuex'
+
     export default {
         name:'Sidebar',
+        setup() {
+            const router = useRouter();
+            const store = useStore();
+
+            const logoutHandle = () => {
+                store.dispatch('removeToken');
+                store.dispatch('removeUserId');
+                router.push({name: 'Home'})
+            };
+            return { logoutHandle }
+        }
     }
 </script>
 

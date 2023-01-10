@@ -36,20 +36,15 @@
                      </strong>
                   </router-link>
                </li>
-               <li class="nav-item">
-                  <router-link :to="{ name : 'User' }" class="nav-link" aria-current="page" >
+
+               <li class="nav-item" >
+                  <router-link :to="{ name : 'User' }" v-if="$store.state.token !== null" class="nav-link" aria-current="page">
                      <strong>
-                        User
+                        Admin
                      </strong>
                   </router-link>
                </li>
-               <li class="nav-item">
-                  <router-link :to="{ name : 'CreateResort' }" class="nav-link" aria-current="page">
-                     <strong>
-                        Resort
-                     </strong>
-                  </router-link>
-               </li>
+               
             </ul>
             <!-- Left links -->
          </div>
@@ -60,6 +55,9 @@
 </template>
 
 <script>
+ export default {
+      name : "NavBar",
+ }
 </script>
 
 <style scoped>

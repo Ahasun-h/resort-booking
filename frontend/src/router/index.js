@@ -12,13 +12,22 @@ const routes = [
         }
     },
     { 
-        path: '/deashbord',
-        name :'Deashbord',
-        component : () => import('../views/Deashbord.vue'),
+        path: '/view/:id',
+        name :'ViewResort',
+        component : () => import('../views/ViewResort.vue'),
         meta: {
             requiresAuth: true
         }
     },
+    { 
+        path: '/booking/:id',
+        name :'ResortBooking',
+        component : () => import('../views/ResortBooking.vue'),
+        meta: {
+            requiresAuth: true
+        }
+    },
+
     // User Routes
     {
         path: '/users',
@@ -70,6 +79,15 @@ const routes = [
         }
     },
 
+    {
+        path: '/bookings',
+        name: 'Bookings',
+        component : () => import('../views/Bookings.vue'),
+        meta: {
+            requiresAuth: true
+        }
+    },
+
 
     {
         path : '/login',
@@ -92,7 +110,7 @@ router.beforeEach((to,from) => {
         return { name: 'Login' }
     }
     if(to.meta.requiresAuth === false && store.state.token !== null){
-        return { name: 'Home' }
+        return { name: 'User' }
     }
 });
 

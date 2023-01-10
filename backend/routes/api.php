@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthenticationController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\ResortController;
 use App\Http\Controllers\Api\ResortImageController;
+use App\Http\Controllers\Api\ResortBookingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,6 +18,8 @@ use App\Http\Controllers\Api\ResortImageController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
+
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
 
@@ -38,8 +41,14 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/resort/images/{id}',[ResortImageController::class,'index']);
     Route::delete('/resort/images/delete/{id}',[ResortImageController::class,'delete']);
 
+    Route::get('/bookings',[ResortBookingController::class,'bookings']);
+
 });
 
 
+
+Route::get('all-resorts',[ResortBookingController::class,'index']);
+Route::get('view-resort/{id}',[ResortBookingController::class,'show']);
+Route::post('resort-booking/{id}',[ResortBookingController::class,'booking']);
 
 Route::post('login',[AuthenticationController::class,'login']);

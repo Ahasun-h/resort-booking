@@ -1,140 +1,150 @@
 <template>
-    <Nav />
-  <section class=" gradient-form">
-        <div class="container py-5">
 
-            <div class="col-12">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div class="col">
-                        <h4 class="text-start">
-                            <strong>
-                                Update Resort 
-                            </strong>
-                        </h4>
-                    </div>
-                    <router-link to="/resorts" class="col-2 btn btn-success">
-                        <i class="fa-solid fa-plus"></i> Back
-                    </router-link>
-                </div>
-            </div>
-            <hr />
-            <div class="row d-flex justify-content-center align-items-center h-100">
-                <div class="col-xl-5 col-md-6 col-12">
-                    <div class="rounded-3 text-black">
-                        <div class="row g-0">
-                            <div class="col-12">
-                                <div class="card-body p-md-4 mx-md-4">
+    <div class="container-fluid p-0">
+        <div class="d-flex">
+            <Sidebar />
+            <div class="col">
+                <DashboardHeader />
+                <main>
+                    <div class="container py-5">
 
-                                    <!-- Start: Success message alert-->
-                                    <div v-if="settingData.success_message" class="mb-4 alert alert-success d-flex justify-content-between align-items-center" role="alert">
-                                        {{ settingData.success_message }} <span @click.prevent="closeAlert">X</span>
-                                    </div>
-                                    <!-- End: Success message alert-->
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="col">
+                                    <h4 class="text-start">
+                                        <strong>
+                                            Update Resort 
+                                        </strong>
+                                    </h4>
+                                </div>
+                                <router-link to="/resorts" class="col-2 btn btn-success">
+                                    <i class="fa-solid fa-plus"></i> Back
+                                </router-link>
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="row d-flex justify-content-center align-items-center h-100">
+                            <div class="col-8">
+                                <div class="rounded-3 text-black">
+                                    <div class="row g-0">
+                                        <div class="col-12">
+                                            <div class="card-body p-md-4 mx-md-4">
 
-                                    <!-- Start: Error message alert-->
-                                    <div v-if="settingData.error" class="alert alert-danger" role="alert">
-                                        {{ settingData.error }}
-                                    </div>
-                                    <!-- End: Error message alert-->
-
-                                    <!-- Start: Form -->
-                                    <form @submit.prevent="updateResort">
-                                        <div class="form-outline mb-4">
-                                            <label class="form-label" for="name">Name</label>
-                                            <input type="text" v-model="resort.name" id="name" class="form-control"
-                                                   :class="errorHandler('name') ? 'is-invalid' : '' "
-                                                   placeholder="Example"/>
-                                            <p v-if="errorHandler('name')" class="text-danger">
-                                                {{ validation_error.name[0] }}
-                                            </p>
-                                        </div>
-                                        <div class="form-outline mb-4">
-                                            <label class="form-label" for="description">Description</label>
-                                            <textarea v-model="resort.description" id="description" class="form-control"
-                                                   :class="errorHandler('description') ? 'is-invalid' : ''"
-                                            ></textarea>
-                                            <p v-if="errorHandler('description')" class="text-danger">
-                                                {{ validation_error.description[0] }}
-                                            </p>
-                                        </div>
-                                        <div class="form-outline mb-4">
-                                            <label class="form-label" for="address">Address</label>
-                                            <textarea v-model="resort.address" id="address" class="form-control"
-                                                   :class="errorHandler('address') ? 'is-invalid' : ''"
-                                            ></textarea>
-                                            <p v-if="errorHandler('address')" class="text-danger">
-                                                {{ validation_error.address[0] }}
-                                            </p>
-                                        </div>
-                                        <div class="form-outline mb-4">
-                                            <label class="form-label" for="location">Location (Google Map Sharable Link)</label>
-                                            <textarea v-model="resort.location" id="location" class="form-control"
-                                                   :class="errorHandler('location') ? 'is-invalid' : ''"
-                                            ></textarea>
-                                            <p v-if="errorHandler('location')" class="text-danger">
-                                                {{ validation_error.location[0] }}
-                                            </p>
-                                        </div>
-                                        <div class="form-outline mb-4">
-                                            <label class="form-label" for="price_per_night">Price Per Night (.tk)</label>
-                                            <input type="number" v-model="resort.price_per_night" id="price_per_night" class="form-control"
-                                                   :class="errorHandler('price_per_night') ? 'is-invalid' : '' "
-                                                   placeholder="Example" min="0" />
-                                            <p v-if="errorHandler('price_per_night')" class="text-danger">
-                                                {{ validation_error.price_per_night[0] }}
-                                            </p>
-                                        </div>
-                                        <div v-if="prevImages.length > 0" class="border border-primary p-4">
-                                            <div >
-                                                <div class="image_privew"  v-for="prevImage in prevImages" :key="prevImage">
-                                                    <img class="w-100" :src="prevImage.image" />
-                                                    <button class="btn btn-danger text-wite img_remove" @click.prevent="deleteImage(prevImage.id)">X</button>
+                                                <!-- Start: Success message alert-->
+                                                <div v-if="settingData.success_message" class="mb-4 alert alert-success d-flex justify-content-between align-items-center" role="alert">
+                                                    {{ settingData.success_message }} <span @click.prevent="closeAlert">X</span>
                                                 </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-outline mb-4">
-                                            <label for="images" class="form-label">Image:</label>
-                                            <input class="form-control mb-3" multiple type="file" :class="errorHandler('images') ? 'is-invalid' : '' "  @change="onFileChange">
-                                            <p v-if="errorHandler('images')" class="text-danger mb-3">
-                                                {{ validation_error.price_per_night[0] }}
-                                            </p>
-                                            <div v-if="images">
-                                                <div class="image_privew"  v-for="image in images" :key="image">
-                                                    <img class="w-100" :src="image" />
-                                                    <button class="btn btn-danger text-wite img_remove" @click="removeImage(index)">X</button>
+                                                <!-- End: Success message alert-->
+
+                                                <!-- Start: Error message alert-->
+                                                <div v-if="settingData.error" class="alert alert-danger" role="alert">
+                                                    {{ settingData.error }}
                                                 </div>
+                                                <!-- End: Error message alert-->
+
+                                                <!-- Start: Form -->
+                                                <form @submit.prevent="updateResort">
+                                                    <div class="form-outline mb-4">
+                                                        <label class="form-label" for="name">Name</label>
+                                                        <input type="text" v-model="resort.name" id="name" class="form-control"
+                                                            :class="errorHandler('name') ? 'is-invalid' : '' "
+                                                            placeholder="Example"/>
+                                                        <p v-if="errorHandler('name')" class="text-danger">
+                                                            {{ validation_error.name[0] }}
+                                                        </p>
+                                                    </div>
+                                                    <div class="form-outline mb-4">
+                                                        <label class="form-label" for="description">Description</label>
+                                                        <textarea v-model="resort.description" id="description" class="form-control"
+                                                            :class="errorHandler('description') ? 'is-invalid' : ''"
+                                                        ></textarea>
+                                                        <p v-if="errorHandler('description')" class="text-danger">
+                                                            {{ validation_error.description[0] }}
+                                                        </p>
+                                                    </div>
+                                                    <div class="form-outline mb-4">
+                                                        <label class="form-label" for="address">Address</label>
+                                                        <textarea v-model="resort.address" id="address" class="form-control"
+                                                            :class="errorHandler('address') ? 'is-invalid' : ''"
+                                                        ></textarea>
+                                                        <p v-if="errorHandler('address')" class="text-danger">
+                                                            {{ validation_error.address[0] }}
+                                                        </p>
+                                                    </div>
+                                                    <div class="form-outline mb-4">
+                                                        <label class="form-label" for="location">Location (Google Map Sharable Link)</label>
+                                                        <textarea v-model="resort.location" id="location" class="form-control"
+                                                            :class="errorHandler('location') ? 'is-invalid' : ''"
+                                                        ></textarea>
+                                                        <p v-if="errorHandler('location')" class="text-danger">
+                                                            {{ validation_error.location[0] }}
+                                                        </p>
+                                                    </div>
+                                                    <div class="form-outline mb-4">
+                                                        <label class="form-label" for="price_per_night">Price Per Night (.tk)</label>
+                                                        <input type="number" v-model="resort.price_per_night" id="price_per_night" class="form-control"
+                                                            :class="errorHandler('price_per_night') ? 'is-invalid' : '' "
+                                                            placeholder="Example" min="0" />
+                                                        <p v-if="errorHandler('price_per_night')" class="text-danger">
+                                                            {{ validation_error.price_per_night[0] }}
+                                                        </p>
+                                                    </div>
+                                                    <div v-if="prevImages.length > 0" class="border border-primary p-4">
+                                                        <div >
+                                                            <div class="image_privew"  v-for="prevImage in prevImages" :key="prevImage">
+                                                                <img class="w-100" :src="prevImage.image" />
+                                                                <button class="btn btn-danger text-wite img_remove" @click.prevent="deleteImage(prevImage.id)">X</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-outline mb-4">
+                                                        <label for="images" class="form-label">Image:</label>
+                                                        <input class="form-control mb-3" multiple type="file" :class="errorHandler('images') ? 'is-invalid' : '' "  @change="onFileChange">
+                                                        <p v-if="errorHandler('images')" class="text-danger mb-3">
+                                                            {{ validation_error.price_per_night[0] }}
+                                                        </p>
+                                                        <div v-if="images">
+                                                            <div class="image_privew"  v-for="image in images" :key="image">
+                                                                <img class="w-100" :src="image" />
+                                                                <button class="btn btn-danger text-wite img_remove" @click="removeImage(index)">X</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-start mb-4">
+                                                        <button v-if="settingData.buttonDisabled"
+                                                                class="btn btn-success btn-block fa-lg gradient-custom-2"
+                                                                type="submit">
+                                                            Update
+                                                        </button>
+                                                        <div v-if="settingData.isLoading" class="spinner-border text-info" role="status">
+                                                        </div>
+                                                    </div>
+                                                
+                                                </form>
+                                                <!-- End: Form -->
                                             </div>
                                         </div>
-                                        <div class="text-start mb-4">
-                                            <button v-if="settingData.buttonDisabled"
-                                                    class="btn btn-success btn-block fa-lg gradient-custom-2"
-                                                    type="submit">
-                                                Update
-                                            </button>
-                                            <div v-if="settingData.isLoading" class="spinner-border text-info" role="status">
-                                            </div>
-                                        </div>
-                                    
-                                    </form>
-                                    <!-- End: Form -->
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </main>
             </div>
         </div>
-    </section>
+    </div>
 </template>
 
 <script>
-    import Nav from '../components/Nav.vue'
+  
     import axiosClient from '../axios';
     import {useRouter} from 'vue-router'
+    import Sidebar from '../components/Sidebar.vue';
+    import DashboardHeader from '../components/DashboardHeader.vue';
 
 export default {
     name: 'UpdateResort',
-    components:{ Nav },
+    components:{ Sidebar, DashboardHeader },
 
     data:function (){
         return {
