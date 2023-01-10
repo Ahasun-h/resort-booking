@@ -24,10 +24,20 @@
                         <div class="row g-0">
                             <div class="col-12">
                                 <div class="card-body p-md-4 mx-md-4">
+
+                                    <!-- Start: Success message alert-->
+                                    <div v-if="settingData.success_message" class="mb-4 alert alert-success d-flex justify-content-between align-items-center" role="alert">
+                                        {{ settingData.success_message }} <span @click.prevent="closeAlert">X</span>
+                                    </div>
+                                    <!-- End: Success message alert-->
+
+                                    <!-- Start: Error message alert-->
                                     <div v-if="settingData.error" class="alert alert-danger" role="alert">
                                         {{ settingData.error }}
                                     </div>
+                                    <!-- End: Error message alert-->
 
+                                    <!-- Start: Form -->
                                     <form @submit.prevent="updateResort">
                                         <div class="form-outline mb-4">
                                             <label class="form-label" for="name">Name</label>
@@ -106,6 +116,7 @@
                                         </div>
                                     
                                     </form>
+                                    <!-- End: Form -->
                                 </div>
                             </div>
                         </div>
@@ -120,10 +131,6 @@
     import Nav from '../components/Nav.vue'
     import axiosClient from '../axios';
     import {useRouter} from 'vue-router'
-    import { useStore } from 'vuex'
-    import { ref, reactive } from 'vue';
-    import Sidebar from '../components/Sidebar.vue';
-    import DashboardHeader from '../components/DashboardHeader.vue';
 
 export default {
     name: 'UpdateResort',
@@ -146,15 +153,21 @@ export default {
             settingData : {
                 isLoading: false,
                 buttonDisabled: true,
-                error : null
+                error : null,
+                success_message : null
             },
             validation_error:{},
             router : useRouter(),
-            store : useStore(),
+
         }
     },
     methods: {
-        // Image input field
+
+        /**
+         * Image input file handle
+         *
+         * @param e
+         */
         onFileChange(e) {
             var files = e.target.files || e.dataTransfer.files;
             if (!files.length) return;
@@ -171,17 +184,26 @@ export default {
             reader.readAsDataURL(files[index]);
             }
         },
-        // remove image form iput field
+
+        /**
+         * Remove image form input
+         *
+         * @param index
+         */
         removeImage(index) {
             this.images.splice(index, 1)
         },
-        
-        
-        updateResort: async function() {
 
-           
+        /**
+         * update resort in database
+         *
+         * @returns {Promise<void>}
+         */
+        updateResort: async function() {
+            // image array data insert into resort object
             this.resort.images = this.images
 
+            // update settingData object data
             this.settingData.isLoading = true;
             this.settingData.buttonDisabled = false;
 
@@ -191,6 +213,7 @@ export default {
                     this.settingData.isLoading = false;
                     this.settingData.buttonDisabled = true;
                 }
+                // return to main page
                 this.$router.push({path:'/resorts'})
             })
             .catch(e => {
@@ -205,10 +228,21 @@ export default {
             })
         },
 
+        /**
+         * Server return validation show in input field
+         *
+         * @param value
+         * @returns {boolean}
+         */
         errorHandler: function(value){
             return this.validation_error.hasOwnProperty(value)
         },
 
+        /**
+         * Get resort images form database
+         *
+         * @returns {Promise<void>}
+         */
         getResortImage: async function (){
             await axiosClient.get('/api/resort/images/'+this.id,{ headers: {'Authorization': 'Bearer '+this.$store.state.token }})
             .then(res => {
@@ -221,11 +255,16 @@ export default {
             })
         },
 
+        /**
+         * Update resort data form database
+         *
+         * @returns {Promise<void>}
+         */
         getResorts: async function (){
-
             await axiosClient.get('/api/resort/view/'+this.id,{ headers: {'Authorization': 'Bearer '+this.$store.state.token }})
                 .then(res => {
                     if (res.data.success) {
+                        // insert response into resort object
                         this.resort = res.data.data
                     }
                 })
@@ -234,11 +273,17 @@ export default {
                 })
         },
 
+        /**
+         * Delete resort image form database
+         *
+         * @param id
+         * @returns {Promise<void>}
+         */
         deleteImage:async function (id){
             await axiosClient.delete('/api/resort/images/delete/'+id,{ headers: {'Authorization': 'Bearer '+this.$store.state.token }})
                 .then(res => {
                     if (res.data.success ) {
-                       
+                       this.settingData.success_message = res.data.message
                     }
                     this.getResortImage();
                 })
@@ -246,11 +291,9 @@ export default {
                     this.settingData.error = e.message
                 })
         }
-       
-
-
     },
     mounted() {
+        // Load Resorts and Resorts images
         this.getResorts();
         this.getResortImage();
     },

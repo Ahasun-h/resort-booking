@@ -27,9 +27,13 @@
                                     <div class="row g-0">
                                         <div class="col-12">
                                             <div class="card-body p-md-4 mx-md-4">
+                                                <!-- Start: Error message alert-->
                                                 <div v-if="data.error" class="alert alert-danger" role="alert">
                                                     {{ data.error }}
                                                 </div>
+                                                <!-- End: Error message alert-->
+
+                                                <!-- Start: form -->
                                                 <form @submit.prevent="handleRegister">
                                                     <div class="form-outline mb-4">
                                                         <label class="form-label" for="name">Name</label>
@@ -76,8 +80,8 @@
                                                         <div v-if="data.isLoading" class="spinner-border text-info" role="status">
                                                         </div>
                                                     </div>
-                                                
                                                 </form>
+                                                <!-- End: form -->
                                             </div>
                                         </div>
                                     </div>
@@ -89,9 +93,6 @@
             </div>
         </div>
     </div>
-
-    
-   
 </template>
 
 <script>
@@ -123,17 +124,21 @@
                 confirm_password: ''
             });
             let validation_error = ref({});
+
+            /**
+             * Create new user in database
+             *
+             * @returns {Promise<void>}
+             */
             const handleRegister = async () => {
                 data.value.isLoading = true;
                 data.value.buttonDisabled = false;
                 await axiosClient.post('/api/user/create',form,{headers: {'Authorization': 'Bearer '+store.state.token }},)
                     .then(res => {
                         if (res.data.success) {
-                            store.dispatch('setToken', res.data.data.token);
-                            store.dispatch('setUserId', res.data.data.user_id);
-                            router.push({name: 'Home'});
                             data.value.isLoading = false;
                             data.value.buttonDisabled = true;
+                            router.push({name: 'Home'});
                         }
                     })
                     .catch(e => {
@@ -146,9 +151,17 @@
                         }
                     })
             };
+
+            /**
+             * Server return validation show in input field
+             *
+             * @param value
+             * @returns {boolean}
+             */
             function errorHandler(value) {
                 return validation_error.value.hasOwnProperty(value)
             }
+
             return {form, validation_error, data, handleRegister, errorHandler}
         },
     }

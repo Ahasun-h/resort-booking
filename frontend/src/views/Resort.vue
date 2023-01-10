@@ -24,8 +24,8 @@
                                     </router-link>
                                 </div>
                             </div>
-                        
                             <div class="col-12">
+                                <!-- Start: Resort Table -->
                                 <table class="table">
                                     <thead>
                                         <tr>
@@ -52,7 +52,7 @@
                                         </tr>          
                                     </tbody>
                                 </table>
-                                                
+                                <!-- End: Resort Table -->
                             </div>
                         </div>
                     </section>
@@ -71,7 +71,6 @@
     import Sidebar from '../components/Sidebar.vue';
     import DashboardHeader from '../components/DashboardHeader.vue';
 
-
     export default {
         name: "Resort",  
         components: { Sidebar, DashboardHeader },
@@ -86,12 +85,16 @@
 
             const resorts = ref([])
 
-            // Get all users
+            // Load getResorts function onMounted
             onMounted(() => {
                 getResorts()
-            })
+            });
 
-            // Get all users
+            /**
+             * Get all resorts form database
+             *
+             * @returns {Promise<void>}
+             */
             const getResorts = async() => {
                 await axiosClient.get('/api/resorts',{ headers: {'Authorization': 'Bearer '+store.state.token }})
                 .then(res => {
@@ -102,25 +105,35 @@
                 .catch(e => {
                     data.value.error = e.message
                 })
-            }
+            };
 
+            /**
+             * Delete Resort form database
+             *
+             * @param id
+             * @returns {Promise<void>}
+             */
             const deleteResort = async (id) => {
                 console.log(id)
                 await axiosClient.delete('/api/resort/delete/'+id,{ headers: {'Authorization': 'Bearer '+store.state.token }})
                 .then(res => {
                     if (res.data.success) {
-                        data.value.success_message = res.data.message
+                        data.value.success_message = res.data.message;
+                        // Call getResorts function to reload table
                         getResorts()
                     }
                 })
                 .catch(e => {
                     data.value.error = e.message
                 })
-            }
+            };
 
+            /**
+             * close alert
+             */
             const closeAlert = () => {
                 data.value.success_message = null
-            }
+            };
 
             return{resorts,data,deleteResort,getResorts,closeAlert}
 

@@ -26,6 +26,7 @@
                             </div>
                         
                             <div class="col-12">
+                                <!-- Start: User Table -->
                                 <table class="table">
                                     <thead>
                                         <tr>
@@ -39,18 +40,17 @@
                                         <tr v-for="user in users" :key="user.id">
                                             <th scope="row">{{ user.id }}</th>
                                             <td>{{ user.name }}</td>
-                                            <td>{{  user.email }}</td>
+                                            <td>{{ user.email }}</td>
                                             <td>
                                                 <div class="btn-group" role="group" aria-label="Basic example">
                                                     <router-link :to="{name: 'UpdateUser' , params:{ id: user.id }}" type="button" class="btn btn-info">Update</router-link>
                                                     <button type="button" class="btn btn-danger" @click.prevent="deleteUser(user.id)">Delete</button>
-                                                
                                                 </div>
                                             </td>
                                         </tr>          
                                     </tbody>
                                 </table>
-                                                
+                                <!-- End: User Table -->
                             </div>
                         </div>
                     </section>
@@ -58,9 +58,6 @@
             </div>
         </div>
     </div>
-
-
-    
 </template>
 
 <script>
@@ -69,7 +66,6 @@
     import { useStore } from 'vuex'
     import Sidebar from '../components/Sidebar.vue';
     import DashboardHeader from '../components/DashboardHeader.vue';
-
 
     export default {
         name: "User",  
@@ -85,12 +81,16 @@
 
             const users = ref([])
 
-            // Get all users
+            // Load getUsers function onMounted
             onMounted(() => {
                 getUsers()
-            })
+            });
 
-            // Get all users
+            /**
+             * Get all users form database
+             *
+             * @returns {Promise<void>}
+             */
             const getUsers = async() => {
                 await axiosClient.get('/api/users',{ headers: {'Authorization': 'Bearer '+store.state.token }})
                 .then(res => {
@@ -101,25 +101,35 @@
                 .catch(e => {
                     data.value.error = e.message
                 })
-            }
+            };
 
+            /**
+             * Delete User form database
+             *
+             * @param id
+             * @returns {Promise<void>}
+             */
             const deleteUser = async (id) => {
                 console.log(id)
                 await axiosClient.delete('/api/user/delete/'+id,{ headers: {'Authorization': 'Bearer '+store.state.token }})
                 .then(res => {
                     if (res.data.success) {
-                        data.value.success_message = res.data.message
+                        data.value.success_message = res.data.message;
+                        // Call getUsers function to reload table
                         getUsers()
                     }
                 })
                 .catch(e => {
                     data.value.error = e.message
                 })
-            }
+            };
 
+            /**
+             * close alert
+             */
             const closeAlert = () => {
                 data.value.success_message = null
-            }
+            };
 
             return{users,data,deleteUser,getUsers,closeAlert}
 

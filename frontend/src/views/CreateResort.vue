@@ -24,10 +24,13 @@
                         <div class="row g-0">
                             <div class="col-12">
                                 <div class="card-body p-md-4 mx-md-4">
+                                    <!-- Start: Error message alert-->
                                     <div v-if="settingData.error" class="alert alert-danger" role="alert">
                                         {{ settingData.error }}
                                     </div>
+                                    <!-- End: Error message alert-->
 
+                                    <!-- Start: form -->
                                     <form @submit.prevent="createResort">
                                         <div class="form-outline mb-4">
                                             <label class="form-label" for="name">Name</label>
@@ -88,8 +91,6 @@
                                             </div>
 
                                         </div>
-                                     
-                                        
                                         <div class="text-start mb-4">
                                             <button v-if="settingData.buttonDisabled"
                                                     class="btn btn-primary btn-block fa-lg gradient-custom-2"
@@ -99,8 +100,8 @@
                                             <div v-if="settingData.isLoading" class="spinner-border text-info" role="status">
                                             </div>
                                         </div>
-                                    
                                     </form>
+                                    <!-- End: form -->
                                 </div>
                             </div>
                         </div>
@@ -115,10 +116,8 @@
     import Nav from '../components/Nav.vue'
     import axiosClient from '../axios';
     import {useRouter} from 'vue-router'
-    import { useStore } from 'vuex'
-    import { ref, reactive } from 'vue';
-    import Sidebar from '../components/Sidebar.vue';
-    import DashboardHeader from '../components/DashboardHeader.vue';
+
+
   
 
 export default {
@@ -127,7 +126,6 @@ export default {
 
     data:function (){
         return {
-            
             images : [],
             resort : {
                 name: '',
@@ -144,13 +142,16 @@ export default {
             },
             validation_error:{},
             router : useRouter(),
-            store : useStore(),
         }
     },
     methods: {
 
+        /**
+         * Image input file handle
+         *
+         * @param e
+         */
         onFileChange(e) {
-    
             var files = e.target.files || e.dataTransfer.files;
             if (!files.length) return;
             this.createImage(files);
@@ -162,37 +163,44 @@ export default {
             reader.onload = function(event) {
                 const imageUrl = event.target.result;
                 vm.images.push(imageUrl);
-            }
+            };
             reader.readAsDataURL(files[index]);
             }
         },
+        /**
+         * Remove image form input
+         *
+         * @param index
+         */
         removeImage(index) {
             this.images.splice(index, 1)
         },
-        
-        createResort: async function() {
 
+        /**
+         * Create new resort in database
+         *
+         * @returns {Promise<void>}
+         */
+        createResort: async function() {
+            // image array data insert into resort object
             this.resort.images = this.images
 
-            console.log(this.resort)
-
-
-            const store = useStore();
-
+            // update settingData object data
             this.settingData.isLoading = true;
             this.settingData.buttonDisabled = false;
-
-            await axiosClient.post('/api/resort/create',this.resort,{headers: {'Authorization': 'Bearer '+this.store.state.token,'Content-Type':'multipart/form-data'}})
+            await axiosClient.post('/api/resort/create',this.resort,{headers: {'Authorization': 'Bearer '+this.$store.state.token,'Content-Type':'multipart/form-data'}})
             .then(res => {
                 if (res.data.success) {
                     this.settingData.isLoading = false;
                     this.settingData.buttonDisabled = true;
                 }
+                // return to main page
                 this.$router.push({path:'/resorts'})
             })
             .catch(e => {
                 this.settingData.isLoading = false;
                 this.settingData.buttonDisabled = true;
+                // check error type
                 if (e.response.status === 422) {
                     this.validation_error = e.response.data.errors
                 }else {
@@ -201,13 +209,15 @@ export default {
             })
         },
 
+        /**
+         * Server return validation show in input field
+         *
+         * @param value
+         * @returns {boolean}
+         */
         errorHandler: function(value){
             return this.validation_error.hasOwnProperty(value)
         }
-
-       
-
-
     }
    
 }

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthenticationController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\ResortController;
+use App\Http\Controllers\Api\ResortImageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,10 +31,12 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/resorts',[ResortController::class,'index']);
     Route::post('/resort/create',[ResortController::class,'store']);
     Route::get('/resort/view/{id}',[ResortController::class,'show']);
-    Route::get('/resort/images/{id}',[ResortController::class,'resortImages']);
-    Route::delete('/resort/images/delete/{id}',[ResortController::class,'resortImagesDelete']);
     Route::delete('/resort/delete/{id}',[ResortController::class,'delete']);
     Route::post('/resort/update/{id}',[ResortController::class,'update']);
+
+    // Resort Image Route
+    Route::get('/resort/images/{id}',[ResortImageController::class,'index']);
+    Route::delete('/resort/images/delete/{id}',[ResortImageController::class,'delete']);
 
 });
 

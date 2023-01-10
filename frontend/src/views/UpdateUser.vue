@@ -27,9 +27,12 @@
                                     <div class="row g-0">
                                         <div class="col-12">
                                             <div class="card-body p-md-4 mx-md-4">
+                                                <!-- Start: Error message alert-->
                                                 <div v-if="setupData.error" class="alert alert-danger" role="alert">
                                                     {{ setupData.error }}
                                                 </div>
+                                                <!-- End: Error message alert-->
+                                                <!-- Start: form -->
                                                 <form @submit.prevent="updateUser">
                                                     <div class="form-outline mb-4">
                                                         <label class="form-label" for="name">Name</label>
@@ -85,8 +88,8 @@
                                                         <div v-if="setupData.isLoading" class="spinner-border text-info" role="status">
                                                         </div>
                                                     </div>
-                                                
                                                 </form>
+                                                <!-- End: form -->
                                             </div>
                                         </div>
                                     </div>
@@ -136,7 +139,7 @@
             // Route params
             const id = ref(useRouter().currentRoute.value.params);
 
-            // Get User Data
+            // Load User Data
             onMounted(async () => {
                 await axiosClient.get('/api/user/'+id.value.id,{ headers: {'Authorization': 'Bearer '+store.state.token }})
                 .then(res => {
@@ -147,11 +150,15 @@
                 .catch(e => {
                     setupData.value.error = e.message
                 })
-            })
+            });
 
-
-            // Update User Data 
+            /**
+             * Update User in database
+             *
+             * @returns {Promise<void>}
+             */
             const updateUser = async () => {
+                //update setupData object data
                 setupData.value.isLoading = true;
                 setupData.value.buttonDisabled = false;
                 await axiosClient.post('/api/user/update/'+id.value.id,user.value,{headers: {'Authorization': 'Bearer '+store.state.token }})
@@ -175,9 +182,17 @@
                         }
                     })
             };
+
+            /**
+             * Server return validation show in input field
+             *
+             * @param value
+             * @returns {boolean}
+             */
             function errorHandler(value) {
                 return validation_error.value.hasOwnProperty(value)
             }
+
             return {validation_error, setupData,user,id, updateUser, errorHandler}
         },
     }
