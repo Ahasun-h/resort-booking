@@ -22,6 +22,7 @@ return new class extends Migration
             $table->date('check_out_date');
             $table->double('number_days');
             $table->double('bill');
+            $table->string('invoice')->nullable();
             $table->timestamps();
         });
     }

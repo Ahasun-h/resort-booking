@@ -31,8 +31,12 @@
                     </div>
                 </div>
 
-                
-                <router-link :to="{name: 'ResortBooking' , params:{ id: id }}" type="button" class="btn btn-primary">Booking</router-link>
+    
+
+               
+
+                <router-link :to="{name: 'ResortBooking' , params:{ id:id.id }}" type="button" class="btn btn-primary">Booking</router-link>
+               
             </div>
             <div class="col-4 p-2">
                 <div class="row">

@@ -35,7 +35,7 @@ class AdminNotifyJob implements ShouldQueue
      */
     public function handle()
     {
-        $adminNotifyMail = new AdminNotifyMail($this->booking,$this->resort);
+        $adminNotifyMail = new AdminNotifyMail($this->booking,$this->user);
         Mail::to($this->user['email'])->send($adminNotifyMail);
     }
 }

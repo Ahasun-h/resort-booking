@@ -41,7 +41,5 @@ class ClientInvoiceJob implements ShouldQueue
         $clientInvoiceMail = new ClientInvoiceMail($this->booking,$this->resort);
         Mail::to($this->booking['email'])->send($clientInvoiceMail);
 
-
-
     }
 }

@@ -10,12 +10,18 @@ use App\Models\Resort;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Str;
+use PDF;
+use Illuminate\Support\Facades\Storage;
 
 
 class ResortBookingController extends Controller
 {
-    //
+    /**
+     * Get resort data
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index(){
        $resorts = Resort::with('resortImage')->get();
         $responce = [
@@ -36,6 +42,13 @@ class ResortBookingController extends Controller
         return response()->json($responce,200);
     }
 
+    /**
+     * Booking Process
+     *
+     * @param Request $request
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function booking(Request $request, $id){
         $request->validate([
             'email'             => 'required|email',
@@ -50,12 +63,30 @@ class ResortBookingController extends Controller
         $date = Carbon::createFromFormat('Y-m-d', $request->booking_date)->format('d-m-Y');
         $checkOutDate = Carbon::parse($date)->addDays($request->number_days)->format('Y-m-d');
 
-         $result = Booking::where('resort_id',$id)
-            ->whereBetween('booking_date', [$bookingDate, $checkOutDate])
-            ->whereBetween('check_out_date', [$bookingDate, $checkOutDate])
-            ->get();
+        $checkin = $request->booking_date;
+        $checkout = $checkOutDate;
 
-         if(empty($result)){
+         $result = Booking::where('resort_id', $id)
+            ->where(function($query) use ($checkin, $checkout) {
+                $query->where(function($query) use ($checkin, $checkout) {
+                    $query->where('booking_date', '<', $checkout)
+                        ->where('check_out_date', '>', $checkin);
+                })->orWhere(function($query) use ($checkin, $checkout) {
+                    $query->where('booking_date', '>=', $checkin)
+                        ->where('check_out_date', '<=', $checkout);
+                });
+            })
+            ->first();
+
+         if($result){
+             $responce = [
+                 'success' => False,
+                 'message' => "Sorry, Resort is already booked!"
+             ];
+
+             return response()->json($responce,200);
+         }
+         else{
              //
              $resort = Resort::findOrFail($id);
              $totalPrice = $resort->price_per_night * $request->number_days;
@@ -70,10 +101,17 @@ class ResortBookingController extends Controller
              $booking->bill = $totalPrice;
              $booking->save();
 
-             $responce = [
-                 'success' => true,
-                 'message' => "booking confirmed successfully"
-             ];
+
+
+             // Create PDF
+             $customPaper = array(0,0,841.8897637795,595.2755905512);
+             $pdf = PDF::loadView('invoice',compact('booking','resort'))->setPaper($customPaper, 'landscape');
+             $invoice = $pdf->download()->getOriginalContent();
+             Storage::put('public/pdf/'.$booking->id.'.pdf', $invoice);
+
+             $booking = Booking::findOrFail($booking->id);
+             $booking->invoice = url('storage/pdf/'.$booking->id.'.pdf');
+             $booking->update();
 
              // send mail usign job queue
              dispatch(new ClientInvoiceJob($booking,$resort));
@@ -81,15 +119,28 @@ class ResortBookingController extends Controller
              // Get Admin
              $user = User::first();
              dispatch(new AdminNotifyJob($booking,$user));
-         }else{
+
+
+
              $responce = [
-                 'success' => False,
-                 'message' => "Sorry, Resort is already booked!"
+                 'success' => true,
+                 'message' => "booking confirmed successfully"
              ];
+
+
+
+
+
+             return response()->json($responce,200);
          }
-        return response()->json($responce,200);
+
     }
 
+    /**
+     * Get All Booking data
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function bookings(){
         $bookings = Booking::all();
         $responce = [
